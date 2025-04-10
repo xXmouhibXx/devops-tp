@@ -1,12 +1,28 @@
-stages: 
-  - test 
-  - deploy 
-test-job: 
-  stage: test 
-  script: 
-    - echo "Running tests..." 
-    - python -m unittest discover -s hello-devops 
-deploy-job: 
-  stage: deploy 
-  script: 
-    - echo "Deploying application..." 
+image: python:3.9
+
+stages: [lint, test, deploy]
+
+cache:
+  paths:
+    - .cache/pip
+
+lint-job:
+  stage: lint
+  script:
+    - pip install flake8
+    - flake8 hello-devops/
+
+test-job:
+  stage: test
+  script:
+    - pip install -r hello-devops/requirements.txt
+    - python -m pytest hello-devops/
+  artifacts:
+    paths:
+      - test-results.txt
+
+deploy-job:
+  stage: deploy
+  script:
+    - echo "Deploying to staging..."
+  when: manual
